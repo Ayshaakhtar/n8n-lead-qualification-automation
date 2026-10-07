@@ -1,0 +1,277 @@
+{
+  "name": "Lead Qualification Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-qualification",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3184,
+        -544
+      ],
+      "id": "7e948a85-46f6-486c-851b-34fec040cde2",
+      "name": "Lead Qualification Webhook",
+      "webhookId": "bd254251-4da9-4276-8cf4-939d310e6b71"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f71ceb0b-56b4-4e37-bc36-c5fb181a8ca4",
+              "name": "Lead_name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "26d78a87-f910-4c70-8353-932616634a4c",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "0ba2a493-c733-410f-8002-d9a2d891306d",
+              "name": "company",
+              "value": "={{ $json.body.company }}",
+              "type": "string"
+            },
+            {
+              "id": "2677071b-3ede-410b-ac36-8709ebd3d235",
+              "name": "budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "string"
+            },
+            {
+              "id": "196f5edd-86ef-4789-8c37-9f8f7863e27f",
+              "name": "Product",
+              "value": "={{ $json.body.product }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -2960,
+        -560
+      ],
+      "id": "fb010ffc-bdba-4e46-ac69-9090addf145c",
+      "name": "Format Lead Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -2128,
+        -592
+      ],
+      "id": "eac48fe1-7a8c-470a-b50e-1e6863c96eb8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d79e8b2f-72d7-40be-8d5d-68c126dfdcc8",
+              "leftValue": "={{ $json.budget }}",
+              "rightValue": 50000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2736,
+        -560
+      ],
+      "id": "0a71d865-16b9-40c3-a30f-25d1d18bdd74",
+      "name": "Lead Qualified?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e351c4fa-56a7-4981-aca1-110a14a8c6c8",
+              "name": "Lead_Status",
+              "value": "Qualified",
+              "type": "string"
+            },
+            {
+              "id": "5a938668-46f5-4ed1-928b-bd5b0e17cf3d",
+              "name": "Lead_message",
+              "value": "=Hello {{ $json.Lead_name }}, thank you for your interest in our {{ $json.Product }}. Your lead has been qualified and our sales team will contact you shortly.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -2448,
+        -704
+      ],
+      "id": "acb26d21-d263-494c-b6f4-89140f5e88c5",
+      "name": "Qualified Lead Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05dde0ca-6d26-49fb-b852-3b5efc0a3e87",
+              "name": "lead_status",
+              "value": "Not Qualified",
+              "type": "string"
+            },
+            {
+              "id": "aaa58dab-5214-4bb2-a0c5-568e7dd01f69",
+              "name": "",
+              "value": "=Hello {{ $json.Lead_name }}, thank you for your interest in our {{ $json.Product }}. Our team will contact you with suitable options.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -2560,
+        -464
+      ],
+      "id": "9b459030-abbd-4e5a-bc41-43f2c69e2af9",
+      "name": "Follow-up Lead Message"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"lead_status\": \"{{ $json.Lead_Status }}\",\n  \"message\": \"{{ $json.Lead_message }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1840,
+        -528
+      ],
+      "id": "9e300061-fc0d-4d6e-8b04-a2c3c67c7d32",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Qualification Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Lead Qualified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Qualified?": {
+      "main": [
+        [
+          {
+            "node": "Qualified Lead Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Follow-up Lead Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified Lead Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Lead Message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5c8a36c9-7f44-4e2c-ae7a-14fed02ece4d",
+  "meta": {
+    "instanceId": "782ac0bf72fafc81346b138d04198c6acd6d630b6305b161832f9e8e93127d8a"
+  },
+  "nodeGroups": [],
+  "id": "cmI0JLniZhF9aJms",
+  "tags": []
+}
